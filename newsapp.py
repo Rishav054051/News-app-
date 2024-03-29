@@ -114,6 +114,10 @@ def run():
     category_entry = tk.Entry(root)
     category_entry.pack()
 
+    # Button to fetch news
+    fetch_button = tk.Button(root, text="Fetch News", command=lambda: get_news(category_entry.get()))
+    fetch_button.pack()
+
     # Create a canvas
     news_canvas = tk.Canvas(root)
     news_canvas.pack(side=tk.LEFT, fill='both', expand=True)
@@ -128,10 +132,6 @@ def run():
     # Create a frame inside the canvas to hold the news articles
     news_frame = tk.Frame(news_canvas)
     news_canvas.create_window((0, 0), window=news_frame, anchor="nw")
-
-    # Button to fetch news
-    fetch_button = tk.Button(root, text="Fetch News", command=lambda: get_news(category_entry.get()))
-    fetch_button.pack()
 
     root.mainloop()
 
