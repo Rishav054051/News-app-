@@ -1,44 +1,42 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk,messagebox
 import requests
-import pyttsx3
-import threading
+import pyttsx3 
 import multiprocessing
-from PIL import Image, ImageTk
+from PIL import Image,ImageTk
 import io
+import threading
 
-Labelfont = "elephanta 10 bold"
-Entryfont = "elephanta 10"
-titlefont = "Helvetica", 16, "bold"
+Labelfont="elephanta 10 bold"
+Entryfont="elephanta 10"
+titlefont='Helvetica', 16, 'bold'
 
-# Global variables
 articles_loaded = 0
 articles_per_load = 5  # Change this number according to your preference
-speak_process = None
-engine = None
-stop_flag = False
 load_more_button = None
 
-
 def get_news(category):
-    global articles_loaded, load_more_button
-
+    global news_canvas,news_frame,articles_loaded,articles_per_load,load_more_button
     # Clear previous news articles if it's the first load
     if articles_loaded == 0:
         for widget in news_frame.winfo_children():
             widget.destroy()
 
-    # Checking if the category is left empty. If yes, showing warning
+    #checking if the category is left empty. If yes, showing warning
     if not category:
-        messagebox.showwarning("Empty Category", "Please Enter a News Category")
-        return
+        messagebox.showwarning("Empty Category","Please Enter a News Category")
 
-    # Fetch news data
+    #if category is not empty and fetching news
     url = f"https://newsapi.org/v2/everything?language=en&q={category}&sortBy=publishedAt&apiKey=112d1223bb0e462f8a2a8aa33edb8909"
-    response = requests.get(url)
-    news_data = response.json()
-    articles = news_data.get("articles", [])
 
+    response=requests.get(url)   #sending requests to server and getting the data
+    news_data=response.json()    #parsing the data in python dictionary form
+    articles=news_data.get('articles',[])   #formatting the data in key and value pair form
+
+    if not articles:   #checking if the artciles is empty or not
+        messagebox.showwarning("No News Found", "No news articles found for the entered category.")
+        return
+    
     # Load articles incrementally
     for i in range(articles_loaded, min(articles_loaded + articles_per_load, len(articles))):
         article = articles[i]
@@ -56,6 +54,9 @@ def get_news(category):
         news_item = tk.Frame(news_frame)
         news_item.pack(anchor="w", padx=10, pady=10, fill="x")
 
+        voice_buttons=tk.Frame(news_frame,bg="black")
+        voice_buttons.pack(anchor="e",padx=10,pady=10,fill="x")
+
         tk.Label(news_item, text=title, font=titlefont).pack(anchor="w")  # Title
         if image_url:
             try:
@@ -68,17 +69,21 @@ def get_news(category):
                 label.pack(side="left", padx=10)
             except Exception as e:
                 print(f"Error loading image: {e}")
-        tk.Label(news_item, text=f"Author: {author} | Source: {source}").pack(anchor="w")  # Author
-        tk.Label(news_item, text=f"Description: {description}").pack(anchor="w")  # Description
+        tk.Label(news_item, text=f"Author: {author} | Source: {source}").pack(anchor='w')  #author
+        tk.Label(news_item, text=f"Description: {description}").pack(anchor='w')   #description
 
         # Speak button
-        speak_button = tk.Button(news_item, text="Speak", command=lambda desc=description: speak_news(desc))
+        speak_button = tk.Button(voice_buttons, text="Speak", command=lambda desc=description: speak_news(desc))
         speak_button.pack(padx=10)
 
         # Stop button
-        stop_button = tk.Button(news_item, text="Stop", command=lambda: stop_narration())
+        stop_button = tk.Button(voice_buttons, text="Stop", command=lambda: stop_narration())
         stop_button.pack(padx=10)
 
+        #updates the canvas while scrolling down with pending queues 
+        news_canvas.update_idletasks()
+        news_canvas.config(scrollregion=news_canvas.bbox("all"))
+    
     articles_loaded += articles_per_load
 
     # Check if there are more articles to load
@@ -113,7 +118,6 @@ def speak_news(description):
     speak_process.start()
     stop_flag = False
 
-
 def speak_process_worker(description):
     global engine, stop_flag
     engine = pyttsx3.init()
@@ -124,7 +128,6 @@ def speak_process_worker(description):
     if stop_flag:
         engine.stop()
 
-
 def stop_narration():
     global stop_flag
     stop_flag = True
@@ -133,52 +136,52 @@ def stop_narration():
     if speak_process and speak_process.is_alive():
         speak_process.terminate()
 
-
 def on_closing():
     stop_narration()
     root.destroy()
-
 
 def fetch_news():
     category = category_entry.get()
     threading.Thread(target=get_news, args=(category,)).start()
 
-
 def run():
-    global root, news_canvas, news_frame, category_entry
-    root = tk.Tk()
-    root.state("zoomed")  # Make GUI window fit for screen automatically
-    root.resizable(0, 0)  # Setting the size of GUI window constant
-    root.title("News App")  # Setting the title of GUI window
+    global root,news_canvas,news_frame,category_entry
+    root=tk.Tk()
+    root.state("zoomed")  #make gui window fit for screen automatically
+    root.resizable(0,0)   #setting the size of gui window constant
+    root.title("News App")  #setting the title of GUI window
     root.protocol("WM_DELETE_WINDOW", on_closing)  # Bind the closing event to on_closing function
 
-    # Making the entry widget for entering the category of the news
-    category_label = tk.Label(root, text="Enter News Category", font=Labelfont)
+    #making the entry widget for entering the category of the news
+    category_label=tk.Label(root,text="Enter News Category",font=Labelfont)
     category_label.pack()
-    category_entry = tk.Entry(root, font=Entryfont)
+    category_entry=tk.Entry(root,font=Entryfont)
     category_entry.pack()
 
-    # Making fetch button
-    fetch_button = tk.Button(root, text="Fetch News", command=fetch_news)
+    #making fetch button 
+    fetch_button=tk.Button(root,text="Fetch News",command=fetch_news)
     fetch_button.pack()
 
-    # Creating canvas to hold the scrollbar
-    news_canvas = tk.Canvas(root, bg="gray")
-    news_canvas.pack(side=tk.LEFT, expand=True, fill="both")
+    #creating canvas to hold the scrollbar
+    news_canvas=tk.Canvas(root,bg="gray")
+    news_canvas.pack(side=tk.LEFT,expand=True,fill="both")
 
-    # Creating a scrollbar
-    scrollbar = ttk.Scrollbar(root, orient="vertical", command=news_canvas.yview)
-    scrollbar.pack(side=tk.RIGHT, fill="y")
+    #creating a scrollbar
+    scrollbar=ttk.Scrollbar(root,orient="vertical",command=news_canvas.yview)
+    scrollbar.pack(side=tk.RIGHT,fill="y")
 
-    # Configuring the scrollbar for canvas
+    #configuring the scrollbar for canvas
     news_canvas.config(yscrollcommand=scrollbar.set)
 
-    # Creating a frame inside the new_canvas for holding the news articles
-    news_frame = tk.Frame(news_canvas)
-    news_canvas.create_window((0, 0), window=news_frame, anchor="nw")
+    #creating a frame inside the new_canvas for holding the news articles
+    news_frame=tk.Frame(news_canvas)
+    news_canvas.create_window((0,0),window=news_frame,anchor="nw")
 
     root.mainloop()
 
-
-if __name__ == "__main__":
+if __name__=="__main__":
+    speak_process = None
+    engine = None
+    stop_flag = False    
     run()
+        
