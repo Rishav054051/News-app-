@@ -162,6 +162,7 @@ def run():
     global root, news_canvas, news_frame, category_entry
     root = tk.Tk()
     root.state("zoomed")
+    root.iconphoto(False, tk.PhotoImage(file="world-news.png"))
     root.title("News App")
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
