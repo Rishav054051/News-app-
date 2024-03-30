@@ -2,11 +2,14 @@
 
 I recently developed a News App using Python's Tkinter library and the News API. This app allows users to fetch news articles based on their preferred category. Here are some key features:
 
-✅ Dynamic Loading: Articles are loaded incrementally, providing a seamless browsing experience.
-✅ Text-to-Speech: Users can listen to news articles using the built-in text-to-speech feature.
-✅ Responsive UI: The app's user interface adapts to different screen sizes, ensuring a consistent experience across devices.
-✅ Scrollbar Functionality: Both vertical and horizontal scrollbars are implemented for smooth navigation through articles.
-
+**✅ Text-to-Speech:** Users can listen to news articles using the built-in text-to-speech feature.
+<br>
+**✅ Dynamic Loading:** Articles are loaded incrementally, providing a seamless browsing experience.
+<br>
+**✅ Responsive UI:** The app's user interface adapts to different screen sizes, ensuring a consistent experience across devices.
+<br>
+**✅ Scrollbar Functionality:** Both vertical and horizontal scrollbars are implemented for smooth navigation through articles.
+<br>
 I'm excited to share this project and welcome any feedback or suggestions for improvement! Feel free to check out the code and try the app yourself
 
 Note: Images for reference 
