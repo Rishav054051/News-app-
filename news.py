@@ -14,6 +14,7 @@ titlefont='Helvetica', 16, 'bold'
 articles_loaded = 0
 articles_per_load = 5  # Change this number according to your preference
 load_more_button = None
+stop_flag=False
 
 def get_news(category):
     global news_canvas,news_frame,articles_loaded,articles_per_load,load_more_button
@@ -54,7 +55,8 @@ def get_news(category):
         news_item = tk.Frame(news_frame)
         news_item.pack(anchor="w", padx=10, pady=10, fill="x")
 
-        voice_buttons=tk.Frame(news_frame,bg="black")
+        #display buttons 
+        voice_buttons=tk.Frame(news_frame)
         voice_buttons.pack(anchor="e",padx=10,pady=10,fill="x")
 
         tk.Label(news_item, text=title, font=titlefont).pack(anchor="w")  # Title
@@ -62,7 +64,7 @@ def get_news(category):
             try:
                 image_data = requests.get(image_url).content
                 image = Image.open(io.BytesIO(image_data))
-                image.thumbnail((100, 100))  # Resize image
+                image.thumbnail((300, 300))  # Resize image
                 photo = ImageTk.PhotoImage(image)
                 label = tk.Label(news_item, image=photo)
                 label.image = photo  # Keep a reference to prevent garbage collection
@@ -162,8 +164,11 @@ def run():
     fetch_button=tk.Button(root,text="Fetch News",command=fetch_news)
     fetch_button.pack()
 
+    # Binding Enter key to fetch_news function
+    root.bind('<Return>', lambda event=None: fetch_news())
+
     #creating canvas to hold the scrollbar
-    news_canvas=tk.Canvas(root,bg="gray")
+    news_canvas=tk.Canvas(root)
     news_canvas.pack(side=tk.LEFT,expand=True,fill="both")
 
     #creating a scrollbar
@@ -173,15 +178,25 @@ def run():
     #configuring the scrollbar for canvas
     news_canvas.config(yscrollcommand=scrollbar.set)
 
+    # Creating a horizontal scrollbar
+    h_scrollbar = ttk.Scrollbar(root, orient="horizontal", command=news_canvas.xview)
+    h_scrollbar.pack(side=tk.BOTTOM, fill="x")
+
+    # Configuring the horizontal scrollbar for canvas
+    news_canvas.config(xscrollcommand=h_scrollbar.set)
+
     #creating a frame inside the new_canvas for holding the news articles
     news_frame=tk.Frame(news_canvas)
     news_canvas.create_window((0,0),window=news_frame,anchor="nw")
+
+    # Binding mouse wheel events to the canvas for both vertical and horizontal scrolling
+    news_canvas.bind_all("<MouseWheel>", lambda event: news_canvas.yview_scroll(-1 * int(event.delta/120), "units"))
+    news_canvas.bind_all("<Shift-MouseWheel>", lambda event: news_canvas.xview_scroll(-1 * int(event.delta/120), "units"))
 
     root.mainloop()
 
 if __name__=="__main__":
     speak_process = None
-    engine = None
-    stop_flag = False    
+    engine = None  
     run()
         
